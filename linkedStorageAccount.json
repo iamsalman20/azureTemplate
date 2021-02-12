@@ -1,56 +1,164 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "storageAccountName": {
-      "type": "string",
-      "metadata": {
-        "description": "Specify the storage account name."
-      }
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "0.0.0.1",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "storageAccountName": {
+            "type": "string"
+        },
+        "accountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS"
+        },
+        "kind": {
+            "type": "string",
+            "defaultValue": "StorageV2"
+        },
+        "accessTier": {
+            "type": "string",
+            "defaultValue": "Hot"
+        },
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "TLS1_2"
+        },
+        "supportsHttpsTrafficOnly": {
+            "type": "bool",
+            "defaultValue": true
+        },
+        "allowBlobPublicAccess": {
+            "type": "bool",
+            "defaultValue": true
+        },
+        "networkAclsBypass": {
+            "type": "string",
+            "defaultValue": "AzureServices"
+        },
+        "networkAclsDefaultAction": {
+            "type": "string",
+            "defaultValue": "Allow"
+        },
+        "isHnsEnabled": {
+            "type": "bool",
+            "defaultValue": false
+        }
     },
-    "location": {
-      "type": "string",
-      "metadata": {
-        "description": "Specify a location for the resources."
-      }
+    "variables": {
+        "storageAccountApiVersion": "[utils.apiVersion('Microsoft.Storage', 'storageAccounts')]",
+        "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
     },
-    "storageSKU": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Standard_ZRS",
-        "Premium_LRS",
-        "Premium_ZRS",
-        "Standard_GZRS",
-        "Standard_RAGZRS"
-      ],
-      "metadata": {
-        "description": "Specify the storage account type."
-      }
+    "functions": [
+        {
+            "namespace": "utils",
+            "members": {
+                "apiVersion": {
+                    "parameters": [
+                        {
+                            "name": "providerNamespace",
+                            "type": "string"
+                        },
+                        {
+                            "name": "resourceType",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[providers(parameters('providerNamespace'), parameters('resourceType')).apiVersions[0]]"
+                    }
+                }
+            }
+        }
+    ],
+    "resources": [
+        {
+            "name": "[parameters('storageAccountName')]",
+	    "kind": "[parameters('kind')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+		"encryption": {
+                    "keySource": "Microsoft.Storage",
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        }
+                    }
+                },
+		"isHnsEnabled": "[parameters('isHnsEnabled')]",
+                "accessTier": "[parameters('accessTier')]",
+                "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+                "supportsHttpsTrafficOnly": "[parameters('supportsHttpsTrafficOnly')]",
+                "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
+                "networkAcls": {
+                    "bypass": "[parameters('networkAclsBypass')]",
+                    "defaultAction": "[parameters('networkAclsDefaultAction')]",
+                    "ipRules": []
+                }
+            },
+            "dependsOn": [],
+            "sku": {
+                "name": "[parameters('accountType')]"
+            }
+        },
+        {
+            "name": "[concat(parameters('storageAccountName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
+            ],
+            "properties": {
+                "policy": {
+                    "rules": [
+                        {
+                            "enabled": true,
+                            "name": "[concat(parameters('storageAccountName'), 'HotToColdRule')]",
+                            "type": "Lifecycle",
+                            "definition": {
+                                "actions": {
+                                "baseBlob": {
+                                    "tierToCool": {
+                                    "daysAfterModificationGreaterThan": 30
+                                    }
+                                },
+                                "snapshot": {
+                                    "tierToCool": {
+                                    "daysAfterCreationGreaterThan": 30
+                                    }
+                                },
+                                "version": {
+                                    "tierToCool": {
+                                    "daysAfterCreationGreaterThan": 30
+                                    }
+                                }
+                                },
+                                "filters": {
+                                    "blobTypes": [
+                                        "blockBlob"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "storageAccountName": {
+            "type": "string",
+            "value": "[parameters('storageAccountName')]"
+        },
+        "storageAccountConnectionString": {
+            "type": "string",
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountResourceId'), variables('storageAccountApiVersion')).keys[0].value)]"
+        }
     }
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2019-06-01",
-      "name": "[parameters('storageAccountName')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('storageSKU')]"
-      },
-      "kind": "StorageV2",
-      "properties": {
-        "supportsHttpsTrafficOnly": true
-      }
-    }
-  ],
-  "outputs": {
-    "storageEndpoint": {
-      "type": "object",
-      "value": "[reference(parameters('storageAccountName')).primaryEndpoints]"
-    }
-  }
 }
