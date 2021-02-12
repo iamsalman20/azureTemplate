@@ -8,6 +8,9 @@
         "storageAccountName": {
             "type": "string"
         },
+        "gridName":{
+         "type":"string"
+        },
         "accountType": {
             "type": "string",
             "defaultValue": "Standard_LRS"
