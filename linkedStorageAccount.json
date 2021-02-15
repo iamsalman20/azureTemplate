@@ -154,42 +154,7 @@
                     ]
                 }
             }
-        },
-        {
-         "name":"[variables('eventGridName')]",
-         "type":"Microsoft.EventGrid/systemTopics",
-         "apiVersion":"2020-04-01-preview",
-         "location":"[resourceGroup().location]",
-         "dependsOn": [
-         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"         
-         ],
-         "properties":{
-            "source":"[variables('evgSource')]",
-            "topicType":"microsoft.storage.storageaccounts"
-         }
-      },
-      {
-         "name":"[concat(parameters('storageAccountName'), '/default')]",
-         "type":"Microsoft.Storage/storageAccounts/blobServices",
-         "apiVersion":"2019-06-01",
-	 "dependsOn": [
-         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"         
-         ],
-         "properties":{
-            "restorePolicy":{
-               "enabled":"[parameters('isContainerRestoreEnabled')]",
-               "days":"[parameters('containerRestorePeriodDays')]"
-            },
-            "deleteRetentionPolicy":{
-               "enabled":"[parameters('isBlobSoftDeleteEnabled')]",
-               "days":"[parameters('blobSoftDeleteRetentionDays')]"
-            },
-            "changeFeed":{
-               "enabled":"[parameters('changeFeed')]"
-            },
-            "isVersioningEnabled":"[parameters('isVersioningEnabled')]"
-         }
-      }
+        }
     ],
     "outputs": {
         "storageAccountName": {
