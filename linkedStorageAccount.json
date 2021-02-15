@@ -76,7 +76,8 @@
     "variables": {
         "storageAccountApiVersion": "[utils.apiVersion('Microsoft.Storage', 'storageAccounts')]",
         "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-        "eventGridName": "[concat('evg-', parameters('gridName'))]"
+        "eventGridName": "[concat('evg-', parameters('gridName'))]",
+        "evtSource": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]"
     },
     "functions": [
         {
@@ -210,7 +211,7 @@
          "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"         
          ],
          "properties":{
-            "source":"[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+            "source":"[variables('evtSource')]",
             "topicType":"microsoft.storage.storageaccounts"
          }
       }
