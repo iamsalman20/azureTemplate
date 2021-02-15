@@ -8,10 +8,6 @@
         "storageAccountName": {
             "type": "string"
         },
-        "gridName":{
-         "type":"string",
-         "defaultValue": "salman"
-      },
         "accountType": {
             "type": "string",
             "defaultValue": "Standard_LRS"
@@ -75,9 +71,7 @@
     },
     "variables": {
         "storageAccountApiVersion": "[utils.apiVersion('Microsoft.Storage', 'storageAccounts')]",
-        "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-        "eventGridName": "[concat('evg-', parameters('gridName'))]",
-        "evgSource": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Storage/storageAccounts/')]"
+        "storageAccountResourceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
     },
     "functions": [
         {
@@ -200,19 +194,6 @@
                "enabled":"[parameters('changeFeed')]"
             },
             "isVersioningEnabled":"[parameters('isVersioningEnabled')]"
-         }
-      },
-      {
-         "name":"[variables('eventGridName')]",
-         "type":"Microsoft.EventGrid/systemTopics",
-         "apiVersion":"2020-04-01-preview",
-         "location":"[resourceGroup().location]",
-         "dependsOn": [
-         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"         
-         ],
-         "properties":{
-            "source":"[variables('evgSource')]",
-            "topicType":"microsoft.storage.storageaccounts"
          }
       }
     ],
