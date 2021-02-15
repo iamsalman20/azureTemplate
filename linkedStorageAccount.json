@@ -43,9 +43,33 @@
             "type": "string",
             "defaultValue": "Allow"
         },
-        "isHnsEnabled": {
-            "type": "bool",
-            "defaultValue": false
+        "isContainerRestoreEnabled":{
+         "type":"bool",
+         "defaultValue":false
+      },
+      "containerRestorePeriodDays":{
+         "type":"int",
+         "defaultValue":364
+      },
+      "isBlobSoftDeleteEnabled":{
+         "type":"bool",
+         "defaultValue":false
+      },
+      "blobSoftDeleteRetentionDays":{
+         "type":"int",
+         "defaultValue":365
+      },
+      "changeFeed":{
+         "type":"bool",
+         "defaultValue":true
+      },
+      "isVersioningEnabled":{
+         "type":"bool",
+         "defaultValue":false
+      },
+      "isHnsEnabled": {
+          "type": "bool",
+          "defaultValue": false
         }
     },
     "variables": {
@@ -154,7 +178,29 @@
                     ]
                 }
             }
-        }
+        },
+        {
+         "name":"[concat(parameters('storageAccountName'), '/default')]",
+         "type":"Microsoft.Storage/storageAccounts/blobServices",
+         "apiVersion":"2019-06-01",
+	 "dependsOn": [
+         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"         
+         ],
+         "properties":{
+            "restorePolicy":{
+               "enabled":"[parameters('isContainerRestoreEnabled')]",
+               "days":"[parameters('containerRestorePeriodDays')]"
+            },
+            "deleteRetentionPolicy":{
+               "enabled":"[parameters('isBlobSoftDeleteEnabled')]",
+               "days":"[parameters('blobSoftDeleteRetentionDays')]"
+            },
+            "changeFeed":{
+               "enabled":"[parameters('changeFeed')]"
+            },
+            "isVersioningEnabled":"[parameters('isVersioningEnabled')]"
+         }
+      }
     ],
     "outputs": {
         "storageAccountName": {
