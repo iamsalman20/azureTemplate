@@ -9,8 +9,9 @@
             "type": "string"
         },
         "gridName":{
-         "type":"string"
-        },
+         "type":"string",
+         "defaultValue": "salman"
+      },
         "accountType": {
             "type": "string",
             "defaultValue": "Standard_LRS"
