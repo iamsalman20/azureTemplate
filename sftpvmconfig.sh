@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 DNS="https://127.0.0.1/backend"
+wget "https://raw.githubusercontent.com/iamsalman20/azureTemplate/master/users.json"
 CONFIG_FILE="users.json"
 while getopts ":P:K:S:" opt; do
     case "${opt}" in
