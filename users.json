@@ -1,0 +1,36 @@
+{
+"users": [
+    {
+      "name": "secunet",
+      "bucket_name": "dbb"
+    },
+    {
+      "name": "extranet",
+      "bucket_name": "dbb"
+    },
+    {
+      "name": "bacen",
+      "bucket_name": "bacen"
+    },
+    {
+      "name": "bancodebrazil",
+      "bucket_name": "bancodebrazil"
+    },
+    {
+      "name": "gdct",
+      "bucket_name": "gdct"
+    },
+    {
+      "name": "sarb",
+      "bucket_name": "sarb"
+    },
+    {
+      "name": "pdpoc",
+      "bucket_name": "pdpoc"
+    },
+    {
+      "name": "dashboard",
+      "bucket_name": "dashboard"
+    }
+  ]
+}
